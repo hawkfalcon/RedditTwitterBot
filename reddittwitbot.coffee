@@ -3,9 +3,9 @@ fs = require('fs')
 snoocore = require 'snoocore'
 config = require('./config.json')
 
-api_url = 'https://api.twitter.com/1.1/statuses/update_with_media.json'
+apiUrl = 'https://api.twitter.com/1.1/statuses/update_with_media.json'
 
-auth_settings = {
+authSettings = {
   consumer_key: config.consumer_key
   consumer_secret: config.consumer_secret
   token: config.token
@@ -54,8 +54,8 @@ repeat = setInterval(->
   return
 , 30000)
  
-post = (status, file_path, callback) ->
-  r = request.post(api_url, oauth:auth_settings, callback)
+post = (status, filename, callback) ->
+  r = request.post(apiUrl, oauth:authSettings, callback)
   form = r.form()
   form.append('status', status)
-  form.append('media[]', fs.createReadStream('./images/' + file_path))
+  form.append('media[]', fs.createReadStream('./images/' + filename))
