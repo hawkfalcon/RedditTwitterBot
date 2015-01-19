@@ -3,9 +3,9 @@ fs = require('fs')
 snoocore = require 'snoocore'
 config = require('./config.json')
 
-apiUrl = 'https://api.twitter.com/1.1/statuses/update_with_media.json'
+api_url = 'https://api.twitter.com/1.1/statuses/update_with_media.json'
 
-authSettings = {
+auth_settings = {
   consumer_key: config.consumer_key
   consumer_secret: config.consumer_secret
   token: config.token
@@ -23,19 +23,20 @@ scrapeReddit = () ->
   }).then((slice) ->
     slice.children.forEach((child, i) ->
       url = child.data.url
+      id = child.data.id
       if url not in posted
-        downloadImage(url, child.data.title)
+        downloadImage(url, child.data.title, id)
     )
   )
 
-downloadImage = (url, title) ->
+downloadImage = (url, title, id) ->
   #flickr doesn't let you scrape
   if ~url.indexOf(".jpg") and not ~url.indexOf("staticflickr")
     console.log(">" + url)
     filename = url.replace(/\//gi, '') #Remove slashes
     download(url, "./images/" + filename, ->
       posted.push(url)
-      tweetPicture(title, filename)
+      tweetPicture(title, id, filename)
     )
 
 download = (url, filename, callback) ->
@@ -43,8 +44,8 @@ download = (url, filename, callback) ->
     request(url).pipe(fs.createWriteStream(filename)).on "close", callback
   )
 
-tweetPicture = (title, filename) -> 
-  post(title, filename, (err, response) ->
+tweetPicture = (title, id, filename) -> 
+  post(title + " http://redd.it/" + id, filename, (err, response) ->
     console.log(err) if err
     console.log(response)
   )
@@ -54,8 +55,8 @@ repeat = setInterval(->
   return
 , 30000)
  
-post = (status, filename, callback) ->
-  r = request.post(apiUrl, oauth:authSettings, callback)
+post = (status, file_path, callback) ->
+  r = request.post(api_url, oauth:auth_settings, callback)
   form = r.form()
   form.append('status', status)
-  form.append('media[]', fs.createReadStream('./images/' + filename))
+  form.append('media[]', fs.createReadStream('./images/' + file_path))
