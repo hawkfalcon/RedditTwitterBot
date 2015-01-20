@@ -1,11 +1,13 @@
 request = require('request')
 fs = require('fs')
-snoocore = require 'snoocore'
+snoocore = require('snoocore')
 config = require('./config.json')
 
 apiUrl = 'https://api.twitter.com/1.1/statuses/update_with_media.json'
+uploadUrl = 'https://upload.twitter.com/1.1/media/upload.json'
+tweetUrl = 'https://api.twitter.com/1.1/statuses/update.json'
 
-authSettings = {
+oauth = {
   consumer_key: config.consumer_key
   consumer_secret: config.consumer_secret
   token: config.token
@@ -19,7 +21,7 @@ posted = []
 scrapeReddit = () ->
   console.log("Scraping reddit for fresh content!")
   reddit('/r/EarthPorn/hot').listing({
-  limit: 10
+  limit: 1
   }).then((slice) ->
     slice.children.forEach((child, i) ->
       url = child.data.url
@@ -43,19 +45,31 @@ download = (url, filename, callback) ->
     request(url).pipe(fs.createWriteStream(filename)).on "close", callback
   )
 
-tweetPicture = (title, filename) -> 
-  post(title, filename, (err, response) ->
+tweetPicture = (title, filename) ->
+  upload(filename, (err, response) ->
     console.log(err) if err
     console.log(response)
+    media = JSON.parse(response.body)
+    console.log(">" + media.media_id_string)
+    tweet(title, media.media_id_string, (err, response) ->
+      console.log(err) if err
+      console.log(response)
+    )
   )
+
+upload = (filename, callback) ->
+  r = request.post(uploadUrl, oauth:oauth, callback)
+  form = r.form()
+  form.append('media', fs.createReadStream('./images/' + filename))
+
+tweet = (status, media, callback) ->
+  console.log(media)
+  r = request.post(tweetUrl, oauth:oauth, callback)
+  form = r.form()
+  form.append('media_ids', media)
+  form.append('status', status)
 
 repeat = setInterval(->
   scrapeReddit()
   return
-, 30000)
- 
-post = (status, filename, callback) ->
-  r = request.post(apiUrl, oauth:authSettings, callback)
-  form = r.form()
-  form.append('status', status)
-  form.append('media[]', fs.createReadStream('./images/' + filename))
+, 3000)
