@@ -9,24 +9,16 @@ uploadUrl = 'https://upload.twitter.com/1.1/media/upload.json'
 tweetUrl = apiUrl + '/1.1/statuses/update.json'
 
 options = {
-  subreddit: '/r/SpacePorn' #which subreddit to parse
-  limit: 2 #how many top posts to grab
+  subreddit: '/r/EarthPorn' #which subreddit to parse
+  limit: 10 #how many top posts to grab
   folder: './images/' #save the downloaded pictures
   frequency: 30 #seconds
-}
-
-#Define in config.json, from https://apps.twitter.com
-keys = {
-  consumer_key: config.consumer_key
-  consumer_secret: config.consumer_secret
-  token: config.token
-  token_secret: config.token_secret
 }
 
 #authorize with OAuth, for posting tweets with media
 oauth = new OAuth.OAuth(
   apiUrl + 'oauth/request_token', apiUrl + 'oauth/access_token',
-  keys.consumer_key, keys.consumer_secret,
+  config.consumer_key, config.consumer_secret,
   '1.0', null, 'HMAC-SHA1'
 )
 
@@ -65,26 +57,16 @@ download = (url, filename, callback) ->
 
 #two parts: upload media, send a tweet
 tweetPicture = (title, filename) ->
-  upload(filename, (err, response) ->
+  media = fs.readFileSync(options.folder + filename).toString("base64")
+  oauth.post(uploadUrl, config.token, config.token_secret, media: media, (err, data, res) ->
     console.log(err) if err
-    console.log(response)
-    media = JSON.parse(response.body)
-    tweet(title, media.media_id_string, (err, response, body) ->
+    console.log(data)
+    body = (status: title, media_ids: JSON.parse(data).media_id_string)
+    oauth.post(tweetUrl, config.token, config.token_secret, body, (err, data, res) ->
       console.log(err) if err
-      console.log(response)
+      console.log(data)
     )
   )
-
-#upload to get a media_id
-upload = (filename, callback) ->
-  r = request.post(uploadUrl, oauth:keys, callback)
-  form = r.form()
-  form.append('media', fs.createReadStream(options.folder + filename))
-
-#tweet using oauth and the media_id
-tweet = (status, media, callback) ->
-  body = (status: status, media_ids: media)
-  oauth.post(tweetUrl, keys.token, keys.token_secret, body, 'application/json', callback)
 
 #repeat forever
 repeat = setInterval(->
