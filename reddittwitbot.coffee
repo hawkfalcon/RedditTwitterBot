@@ -59,13 +59,15 @@ download = (url, filename, callback) ->
 tweetPicture = (title, filename) ->
   media = fs.readFileSync(options.folder + filename).toString("base64")
   oauth.post(uploadUrl, config.token, config.token_secret, media: media, (err, data, res) ->
-    console.log(err) if err
-    console.log(data)
-    body = (status: title, media_ids: JSON.parse(data).media_id_string)
-    oauth.post(tweetUrl, config.token, config.token_secret, body, (err, data, res) ->
-      console.log(err) if err
+    if err 
+      console.log(err)
+    else
       console.log(data)
-    )
+      body = (status: title, media_ids: JSON.parse(data).media_id_string)
+      oauth.post(tweetUrl, config.token, config.token_secret, body, (err, data, res) ->
+        console.log(err) if err
+        console.log(data)
+      )
   )
 
 #repeat forever
