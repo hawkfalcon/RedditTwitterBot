@@ -1,6 +1,14 @@
 {
-	"consumer_key": "-",
-	"consumer_secret": "-",
-	"token": "-",
-	"token_secret": "-"
+    "options": {
+        "subreddit": "EarthPorn",
+        "limit": 10,
+        "folder": "images",
+        "frequency": 3
+    },
+    "keys": {
+        "consumer_key": "-",
+        "consumer_secret": "-",
+        "token": "-",
+        "secret": "-"
+    }
 }
