@@ -17,7 +17,7 @@ oauth = new OAuth.OAuth(
 
 reddit = new SnooCore(userAgent: 'tweetEarth@0.0.1 by /u/hawkfalcon')
 #save previously posted URLs to ensure no duplicate tweets
-posted = []
+posted = fs.readFileSync("data.log").toString().split('\n')
 
 #grab the top hot posts from a subreddit
 scrapeReddit = () ->
@@ -31,6 +31,7 @@ alreadyPosted = (url) ->
 
 addPosted = (url) ->
   posted.push(url) #save url to already posted
+  fs.appendFileSync('data.log', url + '\n')
 
 
 #parse url and download the file
