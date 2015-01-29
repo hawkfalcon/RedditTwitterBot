@@ -23,7 +23,7 @@ posted = fs.readFileSync("data.log").toString().split('\n')
 scrapeReddit = () ->
   console.log('Scraping reddit for fresh content!')
   reddit('/r/' + config.options.subreddit + '/hot').listing({limit: config.options.limit}).then((slice) ->
-    downloadImage(child.data.url, child.data.title) for child in slice.children
+    downloadImage(child.data.url, child.data.title, child.data.id) for child in slice.children
   )
 
 alreadyPosted = (url) -> 
@@ -35,14 +35,14 @@ addPosted = (url) ->
 
 
 #parse url and download the file
-downloadImage = (url, title) ->
+downloadImage = (url, title, id) ->
   #flickr doesn't let you scrape
   if ~url.indexOf('.jpg') and not ~url.indexOf('staticflickr') and not alreadyPosted(url)
     console.log('>' + url)
     path = './' + config.options.folder + '/' + url.replace(/\//gi, '') #path, no slashes
     download(url, path, ->
       addPosted(url)
-      tweetPicture(title, path)
+      tweetPicture(title, path, id)
     )
 
 download = (url, path, callback) ->
@@ -50,16 +50,24 @@ download = (url, path, callback) ->
     request(url).pipe(fs.createWriteStream(path)).on 'close', callback
   )
 
+parseTitle = (status) ->
+  if status.length >= 90 #140 max, - 26 for '... http://redd.it/123456 ' and 22 for pic.twitter link
+    status.substring(0, 90) + '... http://redd.it/'
+  else 
+    status + ' http://redd.it/'
+
+
 #two parts: upload media, send a tweet
-tweetPicture = (status, path) ->
+tweetPicture = (status, path, id) ->
+  console.log parseTitle(status)
   media = fs.readFileSync(path).toString("base64")
-  oauth.post(uploadUrl, config.token, config.token_secret, media: media, (err, data, res) ->
+  oauth.post(uploadUrl, config.keys.token, config.keys.secret, media: media, (err, data, res) ->
     if err 
       console.log(err)
     else
       console.log(data)
-      body = (status: status, media_ids: JSON.parse(data).media_id_string)
-      oauth.post(tweetUrl, config.token, config.token_secret, body, (err, data, res) ->
+      body = (status: parseTitle(status) + id, media_ids: JSON.parse(data).media_id_string) #id adds 20 chars
+      oauth.post(tweetUrl, config.keys.token, config.keys.secret, body, (err, data, res) ->
         console.log(err) if err
         console.log(data)
       )

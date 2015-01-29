@@ -3,7 +3,7 @@
         "subreddit": "EarthPorn",
         "limit": 10,
         "folder": "images",
-        "frequency": 3
+        "frequency": 30
     },
     "keys": {
         "consumer_key": "-",
