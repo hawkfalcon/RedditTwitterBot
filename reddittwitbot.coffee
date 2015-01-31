@@ -64,8 +64,10 @@ tweetPicture = (status, path, id) ->
     else
       body = (status: parseTitle(status) + id, media_ids: JSON.parse(data).media_id_string) #id adds 20 chars
       oauth.post(tweetUrl, config.keys.token, config.keys.secret, body, (err, data, res) ->
-        console.log(err) if err
-        console.log(JSON.parse(data).entities.media[0].url)
+        if err
+          console.log(err) 
+        else
+          console.log(JSON.parse(data).entities.media[0].url)
       )
   )
 
