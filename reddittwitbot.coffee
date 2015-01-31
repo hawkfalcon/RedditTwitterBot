@@ -33,7 +33,6 @@ addPosted = (url) ->
   posted.push(url) #save url to already posted
   fs.appendFileSync('data.log', url + '\n')
 
-
 #parse url and download the file
 downloadImage = (url, title, id) ->
   #flickr doesn't let you scrape
@@ -56,23 +55,21 @@ parseTitle = (status) ->
   else 
     status + ' http://redd.it/'
 
-
 #two parts: upload media, send a tweet
 tweetPicture = (status, path, id) ->
-  console.log parseTitle(status)
   media = fs.readFileSync(path).toString("base64")
   oauth.post(uploadUrl, config.keys.token, config.keys.secret, media: media, (err, data, res) ->
     if err 
       console.log(err)
     else
-      console.log(data)
       body = (status: parseTitle(status) + id, media_ids: JSON.parse(data).media_id_string) #id adds 20 chars
       oauth.post(tweetUrl, config.keys.token, config.keys.secret, body, (err, data, res) ->
         console.log(err) if err
-        console.log(data)
+        console.log(JSON.parse(data).entities.media[0].url)
       )
   )
 
+scrapeReddit()
 #repeat forever
 repeat = setInterval(->
   scrapeReddit()
