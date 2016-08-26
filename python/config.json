@@ -1,0 +1,20 @@
+{
+    "options": {
+        "subreddit": "EarthPorn",
+        "limit": 10,
+        "frequency": 30,
+        "user_agent": "RedditTwitterBot/0.1 by /u/hawkfalcon"
+    },
+    "reddit_oauth": {
+        "username": "-",
+        "password": "-",
+        "client_id": "-",
+        "client_secret": "-"
+    },
+    "twitter_oauth": {
+        "consumer_key": "-",
+        "consumer_secret": "-",
+        "key": "-",
+        "secret": "-"
+    }
+}

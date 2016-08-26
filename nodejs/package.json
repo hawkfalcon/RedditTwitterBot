@@ -1,0 +1,24 @@
+{
+  "name": "RedditTwitterBot",
+  "version": "0.1.0",
+  "description": "Bot that posts pictures from Reddit to Twitter Written with coffeescript.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hawkfalcon/RedditTwitterBot.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hawkfalcon/RedditTwitterBot/issues"
+  },
+  "homepage": "https://github.com/hawkfalcon/RedditTwitterBot#readme",
+  "dependencies": {
+    "oauth": "^0.9.14",
+    "request": "^2.74.0"
+  }
+}
